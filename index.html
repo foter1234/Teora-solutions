@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TEORA Solutions | Soluções Digitais Profissionais</title>
+    <meta name="description" content="TEORA Solutions: Criação de sites, marketing digital, mentoria e branding. Transforme sua empresa digitalmente.">
+    <meta name="keywords" content="sites profissionais, marketing digital, mentoria empresarial, branding">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        /* --- TELA DE INTRODUÇÃO --- */
+        #intro-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 10000; /* Fica acima de TUDO */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1s ease, visibility 1s;
+        }
+
+        #intro-video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Ou 'cover' se quiser que o vídeo preencha tudo */
+            max-width: 1200px; /* Limita largura para não estourar em telas gigantes */
+        }
+
+        /* Estado escondido (quando o vídeo acaba) */
+        #intro-overlay.fade-out {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        /* Botão de Pular */
+        #skip-intro {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: 0.3s;
+            z-index: 10001;
+        }
+
+        #skip-intro:hover {
+            background: var(--azul-claro);
+            border-color: var(--azul-claro);
+        }
+
+        /* Bloquear scroll enquanto o vídeo passa */
+        body.intro-active {
+            overflow: hidden;
+        }
+        /* --- 1. VARIÁVEIS E RESET --- */
+        :root {
+            --azul-profundo: #0A2540;
+            --azul-claro: #00A3FF;
+            --azul-brilho: #4cc9f0;
+            --branco: #FFFFFF;
+            --off-white: #F8F9FA;
+            --cinza-texto: #4A5568;
+            --sombra-card: 0 20px 40px rgba(0, 0, 0, 0.08);
+            --sombra-hero: 0 10px 30px rgba(0, 163, 255, 0.4);
+            --transicao: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Inter', sans-serif; line-height: 1.6; color: var(--azul-profundo); overflow-x: hidden; background-color: var(--branco); }
+        
+        /* Tipografia */
+        h1, h2, h3 { font-weight: 800; letter-spacing: -0.02em; }
+        p { color: var(--cinza-texto); font-weight: 400; }
+        a { text-decoration: none; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+        /* --- 2. HERO SECTION (Impacto Visual) --- */
+        .hero {
+            position: relative;
+            background: linear-gradient(135deg, rgba(10, 37, 64, 0.95) 0%, rgba(0, 10, 20, 0.98) 100%), 
+                        url('https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=2015');
+            background-size: cover;
+            background-position: center;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 0;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+       .logo-hero-main {
+            width: clamp(250px, 40vw, 500px); 
+            height: auto;
+            margin-bottom: 2rem;
+            /* Filtro inicial de brilho mais intenso */
+            filter: drop-shadow(0 0 20px rgba(0, 163, 255, 0.6));
+            
+            /* Combinação de 3 animações: Entrada, Flutuação 3D e Brilho */
+            animation: 
+                logoEntrance 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards,
+                logoFloat3D 6s ease-in-out infinite 1.5s,
+                logoGlowBreath 4s ease-in-out infinite;
+            
+            perspective: 1000px;
+            will-change: transform, filter;
+        }
+
+       /* 1. Entrada Impactante: Surge do fundo com brilho e escala */
+        @keyframes logoEntrance {
+            0% { 
+                opacity: 0; 
+                transform: scale(0.5) translateZ(-500px);
+                filter: brightness(5) blur(10px) drop-shadow(0 0 50px var(--azul-claro));
+            }
+            100% { 
+                opacity: 1; 
+                transform: scale(1) translateZ(0);
+                filter: brightness(1) blur(0) drop-shadow(0 0 20px rgba(0, 163, 255, 0.4));
+            }
+        }
+
+        /* 2. Flutuação Cinematográfica: Movimento em 8 e inclinação leve */
+        @keyframes logoFloat3D {
+            0%, 100% { transform: translateY(0) rotateX(0deg) rotateY(0deg); }
+            25% { transform: translateY(-15px) rotateX(5deg) rotateY(2deg); }
+            50% { transform: translateY(-5px) rotateX(-2deg) rotateY(-5deg); }
+            75% { transform: translateY(-12px) rotateX(2deg) rotateY(3deg); }
+        }
+
+        /* 3. Respiração de Luz: O brilho azul "pulsa" como se estivesse vivo */
+        @keyframes logoGlowBreath {
+            0%, 100% { filter: drop-shadow(0 0 15px rgba(0, 163, 255, 0.3)); }
+            50% { filter: drop-shadow(0 0 35px rgba(0, 163, 255, 0.7)); }
+        }
+
+        .logo-hero-main:hover {
+            cursor: pointer;
+            filter: brightness(1.2) drop-shadow(0 0 45px var(--azul-claro));
+            transition: var(--transicao);
+            transform: scale(1.05) translateZ(50px);
+        }
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            color: var(--branco);
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+        }
+
+        .text-gradient {
+            background: linear-gradient(90deg, #fff, var(--azul-claro));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: clamp(1.1rem, 2vw, 1.3rem);
+            margin-bottom: 2.5rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Botão CTA */
+        .cta-btn {
+            background: linear-gradient(135deg, var(--azul-claro), #0066cc);
+            color: var(--branco);
+            padding: 1.2rem 3rem;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            transition: var(--transicao);
+            box-shadow: 0 10px 25px rgba(0, 163, 255, 0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 20px 40px rgba(0, 163, 255, 0.5);
+            filter: brightness(1.1);
+        }
+
+        
+        /* --- 3. SEÇÃO EQUIPE (VERSÃO ESTÁVEL) --- */
+#sobre {
+    padding: 6rem 0;
+    background: var(--branco);
+    text-align: center;
+    overflow: hidden; /* Evita que a animação crie barra de rolagem */
+}
+
+.team-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 300px;
+}
+
+.team-avatars {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 0;
+    transition: all 0.8s ease;
+}
+
+.avatar-item {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    border: 5px solid #FFF;
+    overflow: visible; /* Para o nome aparecer fora da bola */
+    background: #EEE;
+    position: relative;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* ESTADO INICIAL: Juntinhos (Sobrepostos) */
+    margin: 0 -40px; 
+    z-index: 1;
+    opacity: 0.5;
+    transform: scale(0.9);
+}
+
+/* ESTADO ANIMADO: Quando você chega na seção */
+.team-avatars.animated .avatar-item {
+    margin: 0 15px; /* Espaço entre eles */
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Ajuste de Z-index para a sobreposição inicial ficar bonita */
+.avatar-item:nth-child(1) { z-index: 3; }
+.avatar-item:nth-child(2) { z-index: 2; }
+.avatar-item:nth-child(3) { z-index: 1; }
+
+/* Imagem dentro da bola */
+.avatar-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+/* HOVER: Nome e Destaque */
+.avatar-item:hover, .avatar-item.active {
+    transform: translateY(-15px) scale(1.1) !important;
+    z-index: 10 !important;
+    border-color: var(--azul-claro);
+    box-shadow: 0 15px 30px rgba(0,163,255,0.4);
+}
+
+.avatar-name {
+    position: absolute;
+    bottom: -50px;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    background: #000;
+    color: #fff;
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    white-space: nowrap;
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+
+.avatar-item:hover .avatar-name,
+.avatar-item.active .avatar-name {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+@media (max-width: 768px) {
+    .avatar-item { width: 90px; height: 90px; margin: 0 -25px; }
+    .team-avatars.animated .avatar-item { margin: 0 8px; }
+}
+        /* --- 4. SEÇÃO SERVIÇOS (Banners Vibrantes) --- */
+        .services-section {
+            padding: 6rem 0;
+            background-color: var(--off-white);
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: clamp(2rem, 4vw, 3rem);
+            color: var(--azul-profundo);
+            margin-bottom: 1rem;
+        }
+        
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.1rem;
+            margin-bottom: 4rem;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 40px; /* Mais espaço entre cards */
+        }
+
+        .service-card {
+            background: var(--branco);
+            padding: 3rem 2rem;
+            border-radius: 24px;
+            box-shadow: var(--sombra-card);
+            transition: var(--transicao);
+            text-align: center;
+            position: relative;
+            overflow: visible; /* Permite animação sair um pouco */
+            border: 1px solid transparent;
+        }
+
+        /* Hover no Card */
+        .service-card:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 30px 60px rgba(0, 163, 255, 0.15);
+            border-color: rgba(0, 163, 255, 0.2);
+        }
+
+        /* Wrapper do Lottie */
+        .icon-wrapper {
+            width: 180px; /* BEM MAIOR (era 80/100px) */
+            height: 180px;
+            margin: 0 auto 10px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* Fundo sutil em vez de bola sólida */
+            background: radial-gradient(circle, rgba(0, 163, 255, 0.1) 0%, rgba(255,255,255,0) 70%);
+            border-radius: 50%;
+            transition: var(--transicao);
+        }
+        
+        /* CSS controla o canvas, ignorando atributos HTML antigos */
+        .icon-wrapper canvas {
+            width: 100% !important;
+            height: 100% !important;
+            filter: drop-shadow(0 5px 15px rgba(0, 163, 255, 0.2));
+            transition: var(--transicao);
+        }
+
+        .service-card:hover .icon-wrapper canvas {
+            transform: scale(1.1);
+            filter: drop-shadow(0 10px 25px rgba(0, 163, 255, 0.4));
+        }
+
+        .service-card h3 {
+            font-size: 1.6rem;
+            margin-bottom: 1rem;
+            color: var(--azul-profundo);
+        }
+
+        .service-card p {
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+
+        /* --- 5. OUTRAS SEÇÕES (Por que / Contato) --- */
+        .porque { padding: 6rem 0; background: var(--branco); }
+        .beneficios-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 3rem;
+        }
+        .beneficio {
+            text-align: center;
+            padding: 2rem;
+            border-radius: 20px;
+            background: var(--off-white);
+            transition: var(--transicao);
+        }
+        .beneficio:hover { transform: translateY(-10px); background: #fff; box-shadow: var(--sombra-card); }
+        .beneficio i { font-size: 3rem; color: var(--azul-claro); margin-bottom: 1rem; }
+
+        .contato {
+            padding: 6rem 0;
+            background: linear-gradient(135deg, var(--azul-profundo), #1e3a5f);
+            color: var(--branco);
+            text-align: center;
+        }
+        .contato form {
+            max-width: 600px;
+            margin: 3rem auto 0;
+            display: grid;
+            gap: 1.5rem;
+        }
+        .contato input, .contato textarea {
+            width: 100%;
+            padding: 1.2rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            backdrop-filter: blur(10px);
+            font-size: 1rem;
+        }
+        .contato textarea { height: 150px; resize: vertical; }
+        .contato input::placeholder, .contato textarea::placeholder { color: rgba(255,255,255,0.6); }
+        .contato button { width: 100%; border: none; cursor: pointer; }
+
+        /* Rodapé */
+        .rodape { background: #000; padding: 3rem 0; text-align: center; color: rgba(255,255,255,0.5); }
+        .logo-rodape { width: 180px; filter: brightness(0) invert(1); margin-bottom: 1rem; }
+        .redes a { font-size: 1.8rem; color: #fff; margin: 0 10px; transition: 0.3s; }
+        .redes a:hover { color: var(--azul-claro); }
+
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.2rem; }
+            /* Avatars ajustados para mobile mas ainda grandes */
+            .avatar-item { width: 110px; height: 110px; margin-left: -25px; border-width: 4px; }
+            .team-container { height: 200px; }
+            .icon-wrapper { width: 140px; height: 140px; }
+            .service-card { padding: 2rem 1.5rem; }
+        }
+
+        /* WhatsApp */
+        .whatsapp-float {
+            position: fixed; bottom: 25px; right: 25px;
+            background: #25D366; color: #fff;
+            width: 60px; height: 60px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2rem; box-shadow: 0 10px 25px rgba(37,211,102,0.4);
+            z-index: 999; transition: var(--transicao);
+        }
+        .whatsapp-float:hover { transform: scale(1.1) rotate(10deg); }
+        @media (max-width: 600px) {
+    .contato form div {
+        grid-template-columns: 1fr !important;
+    }
+}
+    </style>
+</head>
+<body>
+    <div id="intro-overlay">
+    <video id="intro-video" muted playsinline>
+        <source src="TEORA-INTRO.mp4" type="video/mp4">
+        </video>
+    <button id="skip-intro">Pular Intro</button>
+</div>
+
+    <header class="hero">
+        <div class="container hero-content">
+            <img src="Logotipo-C.png" alt="TEORA Solutions" class="logo-hero-main">
+            <h1>Soluções Digitais que <br><span class="text-gradient">Escalam Negócios</span></h1>
+            <p>Do design de alta performance à mentoria estratégica. Transformamos sua presença digital em autoridade.</p>
+            
+            <a href="https://wa.me/5567999114062" class="cta-btn" target="_blank">
+                <i class="fab fa-whatsapp"></i> Iniciar meu Projeto
+            </a>
+        </div>
+    </header>
+
+    <section id="sobre">
+    <div class="container">
+        <div class="sobre-text">
+            <h2>Nossa Equipe</h2>
+            <p class="subtitulo-equipe" style="font-size: 1.3rem; max-width: 800px; margin: 0 auto 3rem; color: var(--cinza-texto);">
+                Profissionais que unem inovação, tecnologia e resultados reais para impulsionar seu faturamento.
+            </p>
+
+            <div class="team-container">
+                <div id="team-info" class="member-info-display">
+                    <span id="member-name"></span>
+                </div>
+
+               <div class="team-avatars" id="avatar-group">
+                    <div class="avatar-item" data-name="Thierry Hanrry" onclick="toggleMember(event, this)">
+                        <div class="avatar-name">Thierry Hanrry</div>
+                        <img src="Thierry.jpg" alt="Thierry">
+                    </div>
+                    <div class="avatar-item" data-name="Tiago Teodoro" onclick="toggleMember(event, this)">
+                        <div class="avatar-name">Tiago Teodoro</div>
+                        <img src="Tiago_fundo_azul.jpeg" alt="Tiago">
+                    </div>
+                    <div class="avatar-item" data-name="Lucas Esteves" onclick="toggleMember(event, this)">
+                        <div class="avatar-name">Lucas Esteves</div>
+                        <img src="Lucas_fundo_azul.jpeg" alt="Lucas">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+    <section id="servicos" class="services-section">
+        <div class="container">
+            <h2 class="section-title">Nossos Serviços</h2>
+            <p class="section-subtitle">O que fazemos de melhor para o seu crescimento.</p>
+
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="icon-wrapper">
+                        <canvas id="lottie-sites"></canvas>
+                    </div>
+                    <h3>Criação de Sites</h3>
+                    <p>Sites de alta performance, design responsivo e foco total em conversão e usabilidade.</p>
+                </div>
+
+                <div class="service-card">
+                    <div class="icon-wrapper">
+                        <canvas id="lottie-marketing"></canvas>
+                    </div>
+                    <h3>Marketing Digital</h3>
+                    <p>Gestão de tráfego, social media e estratégias para atrair e reter clientes qualificados.</p>
+                </div>
+
+                <div class="service-card">
+                    <div class="icon-wrapper">
+                        <canvas id="lottie-consultoria"></canvas>
+                    </div>
+                    <h3>Consultoria</h3>
+                    <p>Diagnóstico completo e direcionamento estratégico para escalar sua operação.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="porque" class="porque">
+        <div class="container">
+            <h2 style="text-align: center; color: var(--azul-profundo); margin-bottom: 1rem;">Por Que a TEORA?</h2>
+            <div class="beneficios-grid">
+                <div class="beneficio">
+                    <i class="fas fa-crown"></i>
+                    <h3>Autoridade</h3>
+                    <p>Construímos sua credibilidade no mercado.</p>
+                </div>
+                <div class="beneficio">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Resultados</h3>
+                    <p>Foco em métricas reais de crescimento.</p>
+                </div>
+                <div class="beneficio">
+                    <i class="fas fa-brain"></i>
+                    <h3>Estratégia</h3>
+                    <p>Planejamento personalizado para você.</p>
+                </div>
+                <div class="beneficio">
+                    <i class="fas fa-headset"></i>
+                    <h3>Suporte</h3>
+                    <p>Acompanhamento contínuo e próximo.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+   <section id="contato" class="contato">
+        <div class="container">
+            <h2 class="section-title" style="color: var(--branco);">Vamos Conversar?</h2>
+            <p style="color: rgba(255,255,255,0.8); margin-bottom: 2rem;">
+                Prefere e-mail? Envie os detalhes do seu projeto e responderemos em até 24h.
+            </p>
+            
+            <form action="https://formspree.io/f/mgokbwpo" method="POST">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <input type="text" name="nome" placeholder="Seu Nome Completo" required>
+                    <input type="email" name="_replyto" placeholder="Seu Melhor E-mail" required>
+                </div>
+                
+                <input type="text" name="assunto" placeholder="Assunto (Ex: Criação de Site, Consultoria...)" required>
+                
+                <textarea name="mensagem" placeholder="Descreva brevemente o seu objetivo ou desafio atual..." required></textarea>
+                
+                <input type="hidden" name="_subject" value="Novo Contato via Site TEORA">
+                <input type="hidden" name="_next" value="https://seusite.com/obrigado.html">
+
+                <button type="submit" class="cta-btn" style="width: 100%; justify-content: center; border: none; cursor: pointer;">
+                    <i class="fas fa-paper-plane"></i> Enviar para teorasolutions@gmail.com
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <footer class="rodape" style="background: #000; padding: 4rem 0; text-align: center; color: rgba(255,255,255,0.6);">
+    <div class="container">
+        <img src="Logotipo.png" alt="TEORA Solutions" class="logo-rodape" style="width: 180px; filter: brightness(0) invert(1); margin-bottom: 1.5rem;">
+        
+        <p class="frase-impacto" style="color: #fff; font-size: 1.2rem; font-weight: 600; margin-bottom: 2rem; font-style: italic;">
+            Na Teora, estratégia não é teoria. É faturamento.
+        </p>
+
+        <div class="redes">
+            <a href="https://www.instagram.com/teorasolutions" target="_blank" style="font-size: 1.8rem; color: #fff; margin: 0 10px;"><i class="fab fa-instagram"></i></a>
+        </div>
+        <p class="direitos" style="font-size: 0.9rem; margin-top: 1rem;">&copy; 2026 TEORA Solutions. Todos os direitos reservados.</p>
+    </div>
+</footer>
+
+    <a href="https://wa.me/5567999114062" class="whatsapp-float" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <script type="module">
+        import { DotLottie } from "https://cdn.jsdelivr.net/npm/@lottiefiles/dotlottie-web/+esm";
+
+        // Função Helper para carregar e configurar o Canvas
+        const loadLottie = (id, url) => {
+            const canvas = document.getElementById(id);
+            if(canvas) {
+                // Define resolução interna alta para não ficar borrado quando grande
+                canvas.width = 500; 
+                canvas.height = 500;
+                
+                new DotLottie({
+                    autoplay: true,
+                    loop: true,
+                    canvas: canvas,
+                    src: url,
+                });
+            }
+        };
+
+        // Carregando Animações
+        loadLottie('lottie-sites', 'https://lottie.host/b4a6f826-5a3e-4bb1-a273-27a64277997a/oTmD6ExO6I.lottie');
+        loadLottie('lottie-marketing', 'https://lottie.host/d6c5ec3a-345c-46e5-a2ce-b27e3259a112/gnIg6sgS7c.lottie');
+        loadLottie('lottie-consultoria', 'https://lottie.host/7bde712a-f629-474f-95aa-47431f1361aa/mla5Fd7XcE.lottie');
+    </script>
+
+   <script>
+    // 1. Observer ÚNICO para a animação da Equipe (Entra e Sai)
+    const teamObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            const group = document.getElementById('avatar-group');
+            if (entry.isIntersecting) {
+                group.classList.add('animated');
+            } else {
+                // Remove a classe para eles "juntarem" de novo quando você sai da seção
+                group.classList.remove('animated');
+            }
+        });
+    }, { threshold: 0.2 });
+
+    teamObserver.observe(document.getElementById('sobre'));
+
+    // 2. Função de Clique/Toggle para Mobile
+    function toggleMember(event, element) {
+        event.stopPropagation();
+        const isActive = element.classList.contains('active');
+        
+        // Limpa todos
+        document.querySelectorAll('.avatar-item').forEach(av => av.classList.remove('active'));
+        
+        // Ativa apenas se não estava ativo antes
+        if(!isActive) {
+            element.classList.add('active');
+        }
+    }
+
+    // 3. Limpa seleções ao clicar fora
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.avatar-item').forEach(av => av.classList.remove('active'));
+    });
+
+    // 4. Scroll Reveal para as DEMAIS seções (Exceto avatares para não bugar)
+    const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = "1";
+                entry.target.style.transform = "translateY(0)";
+            }
+        });
+    }, { threshold: 0.1 });
+
+    // Aplicar apenas nos cards e benefícios
+    document.querySelectorAll('.service-card, .beneficio').forEach(el => {
+        el.style.opacity = "0";
+        el.style.transform = "translateY(30px)";
+        el.style.transition = "all 0.6s ease-out";
+        revealObserver.observe(el);
+    });
+    const introOverlay = document.getElementById('intro-overlay');
+    const introVideo = document.getElementById('intro-video');
+    const skipBtn = document.getElementById('skip-intro');
+
+    // Inicia o processo
+    document.body.classList.add('intro-active');
+
+    function finalizarIntro() {
+        introOverlay.classList.add('fade-out');
+        document.body.classList.remove('intro-active');
+        
+        // Remove do DOM após a transição para não pesar
+        setTimeout(() => {
+            introOverlay.remove();
+        }, 1000);
+    }
+
+    // 1. Quando o vídeo terminar naturalmente
+    introVideo.onended = finalizarIntro;
+
+    // 2. Se o usuário clicar em Pular
+    skipBtn.addEventListener('click', finalizarIntro);
+
+    // 3. Play automático (alguns browsers exigem interação, então tentamos dar play no load)
+    window.addEventListener('DOMContentLoaded', () => {
+        introVideo.play().catch(error => {
+            console.log("Autoplay bloqueado pelo browser, aguardando clique.");
+            // Se o browser bloquear o play, mostramos o botão de pular ou iniciamos ao primeiro clique
+            finalizarIntro(); // Opcional: se bugar, pula direto pro site
+        });
+    });
+</script>
+</body>
+</html>
